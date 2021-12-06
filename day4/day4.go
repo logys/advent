@@ -1,6 +1,6 @@
 package main
 
-//import "fmt"
+import "fmt"
 import "os"
 import "bufio"
 import "strings"
@@ -47,12 +47,22 @@ func getBoard() [][]int{
 	line.Scan()
 	board := [][]int{{}}
 
-	for i:= 0; i < 5; i++ {
-		line.Scan()
+	i := 0
+	row_counter := 0
+	for line.Scan() {
 		board_string := line.Text()
+		if board_string == ""{
+			continue
+		}
 		board_array := strings.Split(board_string, " ")
 		dummy, _ := sliceAtoi(board_array)
-		board[0] = append(board[0], dummy...)
+		board[i] = append(board[i], dummy...)
+		row_counter++
+		if row_counter == 5{
+			board = append(board, [][]int{{}}...)
+			row_counter = 0
+			i++
+		}
 	}
 	return board
 }
