@@ -83,15 +83,23 @@ class Line
 	public function getPoints() : array
 	{
 		$result = array();
+		
 		if($this->isHorizontalLine()){
 			foreach(range($this->begin->x, $this->end->x) as $value){
-				$result[] = new Point($value, $this->end->y);
+				$result[] = $this->rectEquation($this->begin, 
+					$this->end, $value);
+			}
+		}else if($this->isDiag()){
+			foreach(range($this->begin->x, $this->end->x) as $value){
+				$result[] = $this->rectEquation($this->begin, 
+					$this->end, $value);
 			}
 		}else{
 			foreach(range($this->begin->y, $this->end->y) as $value){
 				$result[] = new Point($this->end->x, $value);
 			}
 		}
+		//print_r($result);
 		return $result;
 	}
 
@@ -100,28 +108,34 @@ class Line
 		return $this->begin->sameY($this->end);
 	}
 
-	public function writeLineToBoard(&$board) : void
+	public function rectEquation($point1, $point2, $abscissa) : Point
 	{
-		if($this->begin->x > $this->end->x){
-			$tmp = $this->end->x;
-			$this->end->x = $this->begin->x;
-			$this->begin->x = $tmp;
+		try{
+			$y = ($point2->y -$point1->y)/($point2->x - $point1->x)*
+				($abscissa - $point1->x) + $point1->y;
+		}catch(Exception $e){
+			return new Point($point1->y, $point1->y);
 		}
-		if($this->begin->y > $this->end->y){
-			$tmp = $this->end->y;
-			$this->end->y = $this->begin->y;
-			$this->begin->y = $tmp;
-		}
-		for($i = $this->begin->x; $i <= $this->end->x; $i++){
-			for($j = $this->begin->y; $j <= $this->end->y; $j++){
-				try{
-					$board[$i][$j] += 1;
-				}catch(Exception $e){
-					$board[$i][$j] = 1;
-				}
-			}
-		}
+		return new Point($abscissa, $y);
 	}
+
+	public function isDiag() : bool
+	{
+		$difx =abs($this->begin->x - $this->end->x);
+		$dify =abs($this->begin->y - $this->end->y);
+
+		if($difx == $dify)
+			return true;
+		else 
+			return false;
+	}
+
+}
+function interchangePoints(&$point1, &$point2) : void
+{
+	$tmp = $point1;
+	$point1 = $point2;
+	$point2 = $tmp;
 }
 
 set_error_handler('exceptions_error_handler');
@@ -160,11 +174,24 @@ function getLines($file) : array
 		if($line->isRect())
 			$result[] = $line;
 	}
+	fclose($handle);
 	return $result;
 }
 
+function getLinesDiagonal($file) : array
+{
+	$handle = fopen($file, 'r');
+	$result = array();
+	while (($line_string = fgets($handle)) !== false) {
+		$line = parseLine($line_string);
+		if($line->isRect() || $line->isDiag())
+			$result[] = $line;
+	}
+	fclose($handle);
+	return $result;
+}
 $file = 'input';
-$lines = getLines($file);
+$lines = getLinesDiagonal($file);
 $board = new Board();
 $board->fillBoardWithLines($lines);
 echo 'Puntos calientes: ', $board->countIntensePoints(), "\n";

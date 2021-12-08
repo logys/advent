@@ -76,6 +76,30 @@ final class GeneralTests extends TestCase
 		);
 	}
 
+	public function testIsDiag() : void
+	{
+		$line = new Line(new Point(0, 0), new Point(5, 5));
+		$get = $line->isDiag();
+		$want = true;
+
+		$this->assertEquals(
+			$want,
+			$get
+		);
+	}
+
+	public function testIsNotDiag() : void
+	{
+		$line = new Line(new Point(0, 0), new Point(6, 5));
+		$get = $line->isDiag();
+		$want = false;
+
+		$this->assertEquals(
+			$want,
+			$get
+		);
+	}
+
 	public function testGetLinesRects() : void
 	{
 		$file = 'input-test';
@@ -88,11 +112,99 @@ final class GeneralTests extends TestCase
 		);
 	}
 
+	public function testGetLinesRectsAndDiag() : void
+	{
+		$file = 'input-test';
+		$get = getLinesDiagonal($file)[1];
+		$want = new Line(new Point(8, 0), new Point(0, 8));
+
+		$this->assertEquals(
+			$want,
+			$get
+		);
+	}
+
 	public function testGetPointsFromLine() : void
 	{
 		$line = parseLine("3,9 -> 3,7");
 		$get = $line->getPoints();
 		$want = array(new Point(3,9), new Point(3,8), new Point(3,7));
+
+		$this->assertEquals(
+			$want,
+			$get
+		);
+	}
+
+	public function testGetPointsFromLeftToUp() : void
+	{
+		$line = parseLine("3,3 -> 5,5");
+		$get = $line->getPoints();
+		$want = array(new Point(3,3), new Point(4,4), new Point(5,5));
+
+		$this->assertEquals(
+			$want,
+			$get
+		);
+	}
+
+	public function testGetPointsFromLeftToDown() : void
+	{
+		$line = parseLine("3,3 -> 5,1");
+		$get = $line->getPoints();
+		$want = array(new Point(3,3), new Point(4,2), new Point(5,1));
+
+		$this->assertEquals(
+			$want,
+			$get
+		);
+	}
+
+	public function testRectEquation() : void
+	{
+		$point1 = new Point(3,3);
+		$point2 = new Point(5,1);
+		$line = new Line($point1, $point2);
+		$get = $line->rectEquation($point1, $point2, 5);
+		$want = new Point(5,1);
+
+		$this->assertEquals(
+			$want,
+			$get
+		);
+	}
+
+	public function testGetPointsFromRightToUp() : void
+	{
+		$line = parseLine("8,0 -> 0,8");
+		$get = $line->getPoints();
+		$want = array(	new Point(8,0),
+				new Point(7,1),
+				new Point(6,2),
+				new Point(5,3),
+				new Point(4,4),
+				new Point(3,5),
+				new Point(2,6),
+				new Point(1,7),
+				new Point(0,8)
+		);
+
+		$this->assertEquals(
+			$want,
+			$get
+		);
+	}
+
+	public function testGetPointsFromRightToDown() : void
+	{
+		$line = parseLine("6,4 -> 2,0");
+		$get = $line->getPoints();
+		$want = array(	new Point(6,4),
+				new Point(5,3),
+				new Point(4,2),
+				new Point(3,1),
+				new Point(2,0)
+		);
 
 		$this->assertEquals(
 			$want,
@@ -235,6 +347,21 @@ final class GeneralTests extends TestCase
 		$board->fillBoardWithLines($lines);
 		$get = $board->countIntensePoints();
 		$want = 5;
+
+		$this->assertEquals(
+			$want,
+			$get
+		);
+	}
+
+	public function testCountAllPointsWhitDiags() : void
+	{
+		$file = 'input-test';
+		$lines = getLinesDiagonal($file);
+		$board = new Board();
+		$board->fillBoardWithLines($lines);
+		$get = $board->countIntensePoints();
+		$want = 12;
 
 		$this->assertEquals(
 			$want,
