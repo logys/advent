@@ -3,3 +3,5 @@
 apache*
 build*
 *.class
+bin
+obj

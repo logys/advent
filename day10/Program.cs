@@ -7,27 +7,44 @@ namespace day10
     {
         static void Main(string[] args)
         {
-		var line = "{([(<{}[<>[]}>{[]{[(<()>";
-		Console.WriteLine("Es: "+ lineCorrupted(line));
+		Stack<char> stack = new Stack<char>();
+		foreach (string line in System.IO.File.ReadLines("input"))
+		{
+			char corrupted_close = lineCorrupted(line);
+			if (corrupted_close != '0')
+				stack.Push(corrupted_close);
+		}
+		Dictionary<char, int> score = new Dictionary<char, int>();
+		score.Add(')', 3);
+		score.Add(']', 57);
+		score.Add('}', 1197);
+		score.Add('>', 25137);
+		long result = 0;
+		while(stack.Count > 0){
+			result += score[stack.Pop()];
+		}
+		Console.WriteLine("Result 1: " + result);
+		result = 0;
         }
 
-	static bool lineCorrupted(string line)
+	static char lineCorrupted(string line)
 	{
-		List<char> stack = new List<char>();
+		Stack<char> stack = new Stack<char>();
+		Dictionary<char, char> pair = new Dictionary<char, char>();
+		pair.Add('(', ')');
+		pair.Add('[', ']');
+		pair.Add('<', '>');
+		pair.Add('{', '}');
 		foreach (char character in line){
 			if(isClose(character)){
-				var open = stack[stack.Count -1];
-				stack.RemoveAt(stack.Count -1);
-				if(open.Equals(character)){
-					Console.WriteLine(open);
-					Console.WriteLine(character);
-					return true;
+				if (pair[stack.Pop()] != character){
+					return character;
 				}
 			}else{
-				stack.Add(character);
+				stack.Push(character);
 			}
 		}
-		return false;
+		return '0';
 	}
 
 	static bool isClose(char simbol)
